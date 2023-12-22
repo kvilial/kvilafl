@@ -1,0 +1,29 @@
+name: Build C++ and Create Executable
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up build environment
+      run: sudo apt-get install -y g++ libcurl4-openssl-dev
+
+    - name: Build C++ code
+      run: g++ -o main main.cpp -lcurl
+
+    - name: Create archive with executable
+      run: tar czf artifacts.tar.gz main
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: executables
+        path: artifacts.tar.gz
