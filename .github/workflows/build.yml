@@ -20,3 +20,18 @@ jobs:
       run: |
         g++ -o myprogram main.cpp -lcurl
         ./myprogram
+strategy:
+  matrix:
+    cmake-build:
+      build-type: [Debug, Release]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/setup-cxx@v2
+      with:
+        compiler: gcc
+        compiler-version: 10
+        cxx-version: 17  # Указывает использование C++17
