@@ -2,7 +2,6 @@
 #include <fstream>
 #include <cstdlib>
 #include <ctime>
-#include <string>
 #include <curl/curl.h>
 
 // Генерация случайного символа
@@ -23,14 +22,7 @@ std::string generateRandomString() {
 
 // Генерация случайного имени файла
 std::string generateRandomFileName() {
-    return "output/" + generateRandomString() + ".txt";
-}
-
-// Callback-функция для libcurl
-size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* output) {
-    size_t total_size = size * nmemb;
-    output->append((char*)contents, total_size);
-    return total_size;
+    return "output.txt";
 }
 
 int main() {
@@ -48,8 +40,8 @@ int main() {
         return 1;
     }
 
-    // Генерация и вывод строк в файл
-    const int numberOfStrings = 10;
+    // Генерация и вывод строк в файл и в консоль
+    const int numberOfStrings = 10000; // Вы можете изменить количество строк по вашему желанию
     for (int i = 0; i < numberOfStrings; ++i) {
         std::string randomString = generateRandomString();
         std::string fullString = "https://discord.gift/" + randomString;
@@ -66,48 +58,9 @@ int main() {
 
     std::cout << "Файл успешно создан: " << fileName << std::endl;
 
-    // Отправка файла на GitHub
-    CURL* curl;
-    CURLcode res;
-
-    // Инициализация библиотеки libcurl
-    curl_global_init(CURL_GLOBAL_DEFAULT);
-    curl = curl_easy_init();
-
-    if (curl) {
-        // Формирование URL GitHub API
-        std::string githubApiUrl = "https://api.github.com/repos/kvilial/kvilafl/contents/output/" + fileName;
-
-        // Открытие файла для чтения
-        std::ifstream fileToSend(fileName, std::ios::binary);
-        std::string fileContents((std::istreambuf_iterator<char>(fileToSend)), std::istreambuf_iterator<char>());
-
-        // Формирование заголовков HTTP-запроса
-        struct curl_slist* headers = NULL;
-        headers = curl_slist_append(headers, "Content-Type: application/json");
-        headers = curl_slist_append(headers, "User-Agent: curl/7.78.0");
-        headers = curl_slist_append(headers, "Authorization: Bearer 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"); // Замените YOUR_GITHUB_TOKEN на ваш токен
-
-        // Установка параметров HTTP-запроса
-        curl_easy_setopt(curl, CURLOPT_URL, githubApiUrl.c_str());
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, fileContents.c_str());
-
-        // Выполнение HTTP-запроса
-        res = curl_easy_perform(curl);
-
-        // Проверка результата выполнения запроса
-        if (res != CURLE_OK)
-            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-
-        // Очистка ресурсов libcurl
-        curl_slist_free_all(headers);
-        curl_easy_cleanup(curl);
-    }
-
-    // Очистка ресурсов libcurl
-    curl_global_cleanup();
+    // Копирование вывода в буфер обмена
+    std::system(("cat " + fileName + " | xclip -selection clipboard").c_str()); // Для Linux
+    // Или std::system(("type " + fileName + " | clip").c_str()); // Для Windows
 
     return 0;
 }
